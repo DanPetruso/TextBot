@@ -1,13 +1,20 @@
 from twilio.rest import Client
 import sqlite3
+import quotesManager
 
 conn = sqlite3.connect("contacts.db")
 c = conn.cursor()
 
+account_sid = "AC51fecec263256437b0ad0f8c196ed679"
+#auth_token = ""
+#client = Client(account_sid, auth_token)
+#
+#tnum = ""
+
 def easyCommand(command):
     return command.strip().lower()
 
-def createContactDatabase():
+def createContactTable():
     c.execute("""CREATE TABLE contacts (
                 first text,
                 last text,
@@ -23,7 +30,7 @@ def addContact():
     firstName.strip()
     lastName.strip()
     num = input("Number for",firstName,lastName,"(no (), - or spaces)")
-            
+    
     yesNo = easyCommand(input("Is",num,"the correct number for",firstName,lastName + "? (y/n)"))
     if yesNo == "y" or yesNo == "yes":
         c.execute("INSERT INTO contacts VALUES (?,?,?)",(firstName,lastName,num))
@@ -72,7 +79,20 @@ def getContact(firstName,lastName):
                 addContact()
             
 def sendMessage(num):
+
+    #message = client.messages.create(
+    #    to=, 
+    #    from_=tnum,
+    #    body=)
     return None
+
+#used for sending pregenerated quotes
+class Quote:
+    def __init__(self, text):
+        conn = sqlite3.connect("quotes.db")
+        c = conn.cursor()
+        c.execute("INSERT INTO contacts VALUES (?)",(text))
+        conn.commit()
 
 
 if __name__ == '__main__':
@@ -85,15 +105,6 @@ if __name__ == '__main__':
         choice = input()
     
     
-#account_sid = "AC51fecec263256437b0ad0f8c196ed679"
-#auth_token = ""
-#client = Client(account_sid, auth_token)
-#
-#tnum = ""
-#
-#message = client.messages.create(
-#    to=, 
-#    from_=tnum,
-#    body=)
+
     
     
