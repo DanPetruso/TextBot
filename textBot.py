@@ -1,8 +1,9 @@
 from twilio.rest import Client
 import sqlite3
+import quoteManager
 
-conn = sqlite3.connect("contacts.db")
-c = conn.cursor()
+conn1 = sqlite3.connect("contacts.db")
+c1 = conn1.cursor()
 
 account_sid = "AC51fecec263256437b0ad0f8c196ed679"
 #auth_token = ""
@@ -14,13 +15,13 @@ def easyCommand(command):
     return command.strip().lower()
 
 def createContactTable():
-    c.execute("""CREATE TABLE IF NOT EXISTS contacts (
+    c1.execute("""CREATE TABLE IF NOT EXISTS contacts (
                 first text,
                 last text,
                 number text
             )""")
     
-    conn.commit()
+    conn1.commit()
 
 def addContact():
     print("Adding Contact")
@@ -32,13 +33,13 @@ def addContact():
     
     yesNo = easyCommand(input("Is " + num + " the correct number for " + firstName +" "+ lastName + "? (y/n)"))
     if yesNo == "y" or yesNo == "yes":
-        c.execute("INSERT INTO contacts VALUES (?,?,?)",(firstName,lastName,num))
-        conn.commit()
+        c1.execute("INSERT INTO contacts VALUES (?,?,?)",(firstName,lastName,num))
+        conn1.commit()
     
     
 def getContact(firstName,lastName):
-    c.execute("SELECT * FROM contacts WHERE first=? AND last=?",(firstName,lastName))
-    people = c.fetchall()
+    c1.execute("SELECT * FROM contacts WHERE first=? AND last=?",(firstName,lastName))
+    people = c1.fetchall()
         
     #contact not found
     if len(people) == 0:
@@ -69,6 +70,22 @@ def getContact(firstName,lastName):
             if yesNo == "y" or yesNo == "yes":
                 addContact()
             
+            
+def showContacts():
+    c1.execute("SELECT * FROM contacts")
+    people = c1.fetchall()
+    for i in people:
+        print(i[0],"\t",i[1],"\t",i[2])
+        
+def deleteContact():
+    c1.execute("SELECT rowid,* FROM contacts")
+    people = c1.fetchall()
+    for p in people:
+        print(p[0],": ",p[1],"\t",p[2],"\t",p[3])
+    idToDelete = int(input("Select the number corresponding to the contact you would like to delete."))
+    c1.execute("DELETE FROM contacts WHERE rowid=?",(idToDelete,))
+    
+
 def sendMessage(num):
     print("text")
     #message = client.messages.create(
@@ -77,32 +94,53 @@ def sendMessage(num):
     #    body=)
     return None
 
-#used for sending pregenerated quotes
-class Quote:
-    def __init__(self, text):
-        conn = sqlite3.connect("quotes.db")
-        c = conn.cursor()
-        c.execute("INSERT INTO contacts VALUES (?)",(text))
-        conn.commit()
 
 
 if __name__ == '__main__':
     createContactTable()
+    quoteManager.createQuoteTable()
     
-    print("What would you like to do?")
-    print("0 | Get Contact To Send a Message To \n"
-          "1 | Add Contact  \n"
-          "2 | See Contact List  \n"
-          )
-    choice = int(input())
-    if choice == 0:
-        first = input("Enter the first name of the contact. ")
-        last = input("Enter the last name of the contact. ")
-        getContact(first,last)
-    if choice == 1:
-        addContact()
+    print("Welcome to TextBot!")
     
-    
-
-    
-    
+    while True:
+        print("\nWhat would you like to do?")
+        print("0 | Send Message To \n"
+              "1 | Add Contact  \n"
+              "2 | See Contact List  \n"
+              "3 | Delete Contact  \n"
+              "4 | Save a Quote  \n"
+              "5 | Show Quotes  \n"
+              "6 | Delete Quote  \n"
+              )
+        choice = int(input())
+        
+        if choice == 0:
+            first = input("Enter the first name of the contact. ")
+            last = input("Enter the last name of the contact. ")
+            getContact(first,last)
+            
+        if choice == 1:
+            addContact()
+            
+        if choice == 2:
+            showContacts()
+            
+        if choice == 3:
+            deleteContact()
+            
+        if choice == 4:
+            q = input("Quote: ")
+            quoteManager.storeQuote(q)
+            
+        if choice == 5:
+            quoteManager.showQuotes()
+            
+        if choice == 6:
+            quoteManager.deleteQuote()
+            
+        else:
+            break
+        
+    conn1.close()
+    quoteManager.conn2.close()
+            
