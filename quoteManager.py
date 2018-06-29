@@ -25,5 +25,14 @@ def deleteQuote():
     quotes = c2.fetchall()
     for q in quotes:
         print(q[0],": ",q[1])
-    idToDelete = int(input("Select the number corresponding to the quote you would like to delete."))
+    idToDelete = int(input("Select the number corresponding to the quote you would like to delete. "))
     c2.execute("DELETE FROM quotes WHERE rowid=?",(idToDelete,))
+    conn2.commit()
+    
+def getQuote():
+    c2.execute("SELECT rowid,* FROM quotes")
+    quotes = c2.fetchall()
+    for q in quotes:
+        print(q[0],": ",q[1])
+    idToSend = int(input("Select the number corresponding to the quote you would like to send."))
+    return quotes[idToSend-1][1]
